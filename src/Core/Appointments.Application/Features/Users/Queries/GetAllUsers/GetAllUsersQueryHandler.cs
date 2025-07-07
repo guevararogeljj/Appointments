@@ -1,0 +1,33 @@
+using Appointments.Domain.Entities.Identity;
+using MediatR;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Appointments.Application.Contracts.Persistence;
+
+namespace Appointments.Application.Features.Users.Queries.GetAllUsers;
+
+public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, IReadOnlyList<UserDto>>
+{
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public GetAllUsersQueryHandler(UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork)
+    {
+        _userManager = userManager;
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<IReadOnlyList<UserDto>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+    {
+        var users = await _userManager.Users.ToListAsync();
+
+        return users.Select(u => new UserDto
+        {
+            Id = u.Id,
+            FirstName = u.FirstName,
+            LastName = u.LastName,
+            Email = u.Email,
+            UserName = u.UserName
+        }).ToList();
+    }
+}

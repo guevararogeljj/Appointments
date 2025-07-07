@@ -1,0 +1,30 @@
+# Dependencies
+/packages/
+/node_modules/
+
+# Build results
+[Bb]in/
+[Oo]bj/
+
+# Rider
+.idea/
+*.sln.DotSettings.user
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+
+# User-specific files
+*.userosscache
+*.sln.docstates
+
+# Build server files
+_ReSharper*/
+*.[Tt]est[Rr]esult*
+*.VisualState.xml
+
+# Other
+*.zip
+*.rar
+*.7z
