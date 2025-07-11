@@ -12,7 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Appointments.Application.Features.Auth;
 using Appointments.Infrastructure.Services;
-
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 namespace Appointments.Infrastructure;
 
 public static class DependencyInjection
@@ -26,26 +26,9 @@ public static class DependencyInjection
         services.AddIdentity<ApplicationUser, ApplicationRole>()
             .AddEntityFrameworkStores<AppointmentsDbContext>()
             .AddDefaultTokenProviders();
-
-        // // Add JWT Authentication
-        // services.AddAuthentication(options =>
-        // {
-        //     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        //     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        // })
-        // .AddJwtBearer(options =>
-        // {
-        //     options.TokenValidationParameters = new TokenValidationParameters
-        //     {
-        //         ValidateIssuer = true,
-        //         ValidateAudience = true,
-        //         ValidateLifetime = true,
-        //         ValidateIssuerSigningKey = true,
-        //         ValidIssuer = configuration["JwtSettings:Issuer"],
-        //         ValidAudience = configuration["JwtSettings:Audience"],
-        //         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:Key"]))
-        //     };
-        // });
+        
+        services.AddHealthChecks()
+            .AddDbContextCheck<AppointmentsDbContext>();
         
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IAuthService, AuthService>();
