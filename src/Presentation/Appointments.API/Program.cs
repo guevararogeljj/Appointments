@@ -132,7 +132,7 @@ app.UseAuthorization();
 app.MapHub<ChatHub>("/chatHub");
 app.MapControllers();
 
-
+app.MapHealthChecks("/healthz");
 app.MapControllerRoute(
     name: "default",
     pattern: "api/{version}/[controller]");
