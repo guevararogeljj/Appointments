@@ -29,7 +29,7 @@ public class RolesController : ControllerBase
         var result = await _mediator.Send(new GetAllRolesQuery());
         if (result.Error != null)
         {
-            return BadRequest(result.Error);
+            return Problem(statusCode: 400, title: result.Error.Code, detail: result.Error.Message);
         }
         return Ok(result.Result);
     }
@@ -40,7 +40,7 @@ public class RolesController : ControllerBase
         var result = await _mediator.Send(new GetRoleByIdQuery { Id = id });
         if (result.Error != null)
         {
-            return NotFound(result.Error);
+            return Problem(statusCode: 404, title: result.Error.Code, detail: result.Error.Message);
         }
         return Ok(result.Result);
     }
@@ -51,7 +51,7 @@ public class RolesController : ControllerBase
         var result = await _mediator.Send(command);
         if (result.Error != null)
         {
-            return BadRequest(result.Error);
+            return Problem(statusCode: 400, title: result.Error.Code, detail: result.Error.Message);
         }
         return Ok(result.Result);
     }
@@ -62,7 +62,7 @@ public class RolesController : ControllerBase
         var result = await _mediator.Send(command);
         if (result.Error != null)
         {
-            return BadRequest(result.Error);
+            return Problem(statusCode: 400, title: result.Error.Code, detail: result.Error.Message);
         }
         return NoContent();
     }
@@ -73,7 +73,7 @@ public class RolesController : ControllerBase
         var result = await _mediator.Send(new DeleteRoleCommand { Id = id });
         if (result.Error != null)
         {
-            return BadRequest(result.Error);
+            return Problem(statusCode: 400, title: result.Error.Code, detail: result.Error.Message);
         }
         return NoContent();
     }

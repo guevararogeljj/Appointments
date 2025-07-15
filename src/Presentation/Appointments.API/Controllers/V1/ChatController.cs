@@ -28,7 +28,7 @@ public class ChatController : ControllerBase
         var result = await _mediator.Send(command);
         if (result.Error != null)
         {
-            return BadRequest(result.Error);
+            return Problem(statusCode: 400, title: result.Error.Code, detail: result.Error.Message);
         }
         return Ok(result.Result);
     }
@@ -39,7 +39,7 @@ public class ChatController : ControllerBase
         var result = await _mediator.Send(new GetChatMessagesQuery { ChatRoomId = chatRoomId });
         if (result.Error != null)
         {
-            return NotFound(result.Error);
+            return Problem(statusCode: 404, title: result.Error.Code, detail: result.Error.Message);
         }
         return Ok(result.Result);
     }
@@ -50,12 +50,12 @@ public class ChatController : ControllerBase
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
         {
-            return Unauthorized(new Error("Unauthorized", "User not found"));
+            return Problem(statusCode: 401, title: "Unauthorized", detail: "User not found");
         }
         var result = await _mediator.Send(new GetUserChatRoomsQuery { UserId = userId });
         if (result.Error != null)
         {
-            return NotFound(result.Error);
+            return Problem(statusCode: 404, title: result.Error.Code, detail: result.Error.Message);
         }
         return Ok(result.Result);
     }

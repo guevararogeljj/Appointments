@@ -27,7 +27,7 @@ public class AuthController : ControllerBase
         var result = await _authService.Login(request);
         if (result.Error != null)
         {
-            return Unauthorized(result.Error);
+            return Problem(statusCode: 401, title: result.Error.Code, detail: result.Error.Message);
         }
         return Ok(result.Result);
     }
@@ -38,7 +38,7 @@ public class AuthController : ControllerBase
         var result = await _authService.Register(request);
         if (result.Error != null)
         {
-            return BadRequest(result.Error);
+            return Problem(statusCode: 400, title: result.Error.Code, detail: result.Error.Message);
         }
 
         var user = await _userManager.FindByEmailAsync(request.Email);
@@ -56,7 +56,7 @@ public class AuthController : ControllerBase
         var result = await _authService.RefreshToken(request);
         if (result.Error != null)
         {
-            return Unauthorized(result.Error);
+            return Problem(statusCode: 401, title: result.Error.Code, detail: result.Error.Message);
         }
         return Ok(result.Result);
     }
