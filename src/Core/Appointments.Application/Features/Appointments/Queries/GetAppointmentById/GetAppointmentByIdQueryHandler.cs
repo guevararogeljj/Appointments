@@ -1,11 +1,12 @@
 using Appointments.Application.Contracts.Persistence;
 using Appointments.Application.Features.Appointments.Queries.GetAllAppointments;
 using Appointments.Application.Features.Patients.Queries.GetAllPatients;
+using Appointments.Domain.Common;
 using MediatR;
 
 namespace Appointments.Application.Features.Appointments.Queries.GetAppointmentById;
 
-public class GetAppointmentByIdQueryHandler : IRequestHandler<GetAppointmentByIdQuery, AppointmentDto>
+public class GetAppointmentByIdQueryHandler : IRequestHandler<GetAppointmentByIdQuery, Response<AppointmentDto>>
 {
     private readonly IUnitOfWork _unitOfWork;
 
@@ -14,16 +15,16 @@ public class GetAppointmentByIdQueryHandler : IRequestHandler<GetAppointmentById
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<AppointmentDto> Handle(GetAppointmentByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Response<AppointmentDto>> Handle(GetAppointmentByIdQuery request, CancellationToken cancellationToken)
     {
         var appointment = await _unitOfWork.Appointments.GetByIdAsync(request.Id);
 
         if (appointment == null)
         {
-            return null;
+            return new Response<AppointmentDto> { Error = new Error("NotFound", $"Appointment with ID {request.Id} not found.") };
         }
 
-        return new AppointmentDto
+        var dto = new AppointmentDto
         {
             Id = appointment.Id,
             PatientId = appointment.PatientId,
@@ -38,5 +39,7 @@ public class GetAppointmentByIdQueryHandler : IRequestHandler<GetAppointmentById
                 PhoneNumber = appointment.Patient.PhoneNumber
             }
         };
+
+        return new Response<AppointmentDto> { Result = dto };
     }
 }

@@ -3,10 +3,11 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Appointments.Application.Contracts.Persistence;
+using Appointments.Domain.Common;
 
 namespace Appointments.Application.Features.Users.Queries.GetAllUsers;
 
-public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, IReadOnlyList<UserDto>>
+public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, Response<IReadOnlyList<UserDto>>>
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IUnitOfWork _unitOfWork;
@@ -17,11 +18,11 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, IReadOn
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IReadOnlyList<UserDto>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+    public async Task<Response<IReadOnlyList<UserDto>>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
     {
         var users = await _userManager.Users.ToListAsync();
 
-        return users.Select(u => new UserDto
+        var dtos = users.Select(u => new UserDto
         {
             Id = u.Id,
             FirstName = u.FirstName,
@@ -29,5 +30,7 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, IReadOn
             Email = u.Email,
             UserName = u.UserName
         }).ToList();
+
+        return new Response<IReadOnlyList<UserDto>> { Result = dtos };
     }
 }

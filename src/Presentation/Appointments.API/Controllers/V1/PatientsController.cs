@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Appointments.Application.Features.Patients.Commands.CreatePatient;
 using Appointments.Application.Features.Patients.Queries.GetAllPatients;
 using Appointments.Application.Features.Patients.Queries.GetPatientById;
+using Appointments.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,25 +24,33 @@ public class PatientsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var dtos = await _mediator.Send(new GetAllPatientsQuery());
-        return Ok(dtos);
+        var result = await _mediator.Send(new GetAllPatientsQuery());
+        if (result.Error != null)
+        {
+            return BadRequest(result.Error);
+        }
+        return Ok(result.Result);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        var dto = await _mediator.Send(new GetPatientByIdQuery { Id = id });
-        if (dto == null)
+        var result = await _mediator.Send(new GetPatientByIdQuery { Id = id });
+        if (result.Error != null)
         {
-            return NotFound();
+            return NotFound(result.Error);
         }
-        return Ok(dto);
+        return Ok(result.Result);
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreatePatientCommand command)
     {
-        var id = await _mediator.Send(command);
-        return Ok(id);
+        var result = await _mediator.Send(command);
+        if (result.Error != null)
+        {
+            return BadRequest(result.Error);
+        }
+        return Ok(result.Result);
     }
 }

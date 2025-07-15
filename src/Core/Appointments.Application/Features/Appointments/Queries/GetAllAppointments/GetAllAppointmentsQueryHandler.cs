@@ -1,10 +1,11 @@
 using Appointments.Application.Contracts.Persistence;
 using Appointments.Application.Features.Patients.Queries.GetAllPatients;
+using Appointments.Domain.Common;
 using MediatR;
 
 namespace Appointments.Application.Features.Appointments.Queries.GetAllAppointments;
 
-public class GetAllAppointmentsQueryHandler : IRequestHandler<GetAllAppointmentsQuery, IReadOnlyList<AppointmentDto>>
+public class GetAllAppointmentsQueryHandler : IRequestHandler<GetAllAppointmentsQuery, Response<IReadOnlyList<AppointmentDto>>>
 {
     private readonly IUnitOfWork _unitOfWork;
 
@@ -13,11 +14,11 @@ public class GetAllAppointmentsQueryHandler : IRequestHandler<GetAllAppointments
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IReadOnlyList<AppointmentDto>> Handle(GetAllAppointmentsQuery request, CancellationToken cancellationToken)
+    public async Task<Response<IReadOnlyList<AppointmentDto>>> Handle(GetAllAppointmentsQuery request, CancellationToken cancellationToken)
     {
         var appointments = await _unitOfWork.Appointments.GetAllAsync();
 
-        return appointments.Select(a => new AppointmentDto
+        var dtos = appointments.Select(a => new AppointmentDto
         {
             Id = a.Id,
             PatientId = a.PatientId,
@@ -32,5 +33,7 @@ public class GetAllAppointmentsQueryHandler : IRequestHandler<GetAllAppointments
                 PhoneNumber = a.Patient.PhoneNumber
             }
         }).ToList();
+
+        return new Response<IReadOnlyList<AppointmentDto>> { Result = dtos };
     }
 }

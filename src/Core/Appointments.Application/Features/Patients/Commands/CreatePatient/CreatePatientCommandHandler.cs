@@ -1,10 +1,11 @@
 using Appointments.Application.Contracts.Persistence;
+using Appointments.Domain.Common;
 using Appointments.Domain.Entities;
 using MediatR;
 
 namespace Appointments.Application.Features.Patients.Commands.CreatePatient;
 
-public class CreatePatientCommandHandler : IRequestHandler<CreatePatientCommand, Guid>
+public class CreatePatientCommandHandler : IRequestHandler<CreatePatientCommand, Response<Guid>>
 {
     private readonly IUnitOfWork _unitOfWork;
 
@@ -13,7 +14,7 @@ public class CreatePatientCommandHandler : IRequestHandler<CreatePatientCommand,
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Guid> Handle(CreatePatientCommand request, CancellationToken cancellationToken)
+    public async Task<Response<Guid>> Handle(CreatePatientCommand request, CancellationToken cancellationToken)
     {
         var patient = new Patient
         {
@@ -27,6 +28,6 @@ public class CreatePatientCommandHandler : IRequestHandler<CreatePatientCommand,
         await _unitOfWork.Patients.AddAsync(patient);
         await _unitOfWork.CompleteAsync();
 
-        return patient.Id;
+        return new Response<Guid> { Result = patient.Id };
     }
 }

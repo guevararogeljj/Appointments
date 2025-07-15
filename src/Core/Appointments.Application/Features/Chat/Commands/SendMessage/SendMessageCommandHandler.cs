@@ -1,10 +1,11 @@
 using Appointments.Application.Contracts.Persistence;
+using Appointments.Domain.Common;
 using Appointments.Domain.Entities.Chat;
 using MediatR;
 
 namespace Appointments.Application.Features.Chat.Commands.SendMessage;
 
-public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Guid>
+public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Response<Guid>>
 {
     private readonly IUnitOfWork _unitOfWork;
 
@@ -13,7 +14,7 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Gui
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Guid> Handle(SendMessageCommand request, CancellationToken cancellationToken)
+    public async Task<Response<Guid>> Handle(SendMessageCommand request, CancellationToken cancellationToken)
     {
         var chatMessage = new ChatMessage
         {
@@ -28,6 +29,6 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Gui
         await _unitOfWork.ChatMessages.AddAsync(chatMessage);
         await _unitOfWork.CompleteAsync();
 
-        return chatMessage.Id;
+        return new Response<Guid> { Result = chatMessage.Id };
     }
 }

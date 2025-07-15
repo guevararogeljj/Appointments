@@ -2,10 +2,11 @@ using Appointments.Domain.Entities.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Appointments.Application.Contracts.Persistence;
+using Appointments.Domain.Common;
 
 namespace Appointments.Application.Features.Users.Commands.DeleteUser;
 
-public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, bool>
+public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Response<bool>>
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IUnitOfWork _unitOfWork;
@@ -16,16 +17,16 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, bool>
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<bool> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
+    public async Task<Response<bool>> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
     {
         var user = await _userManager.FindByIdAsync(request.Id);
         if (user == null)
         {
-            return false;
+            return new Response<bool> { Error = new Error("NotFound", $"User with ID {request.Id} not found.") };
         }
 
         var result = await _userManager.DeleteAsync(user);
         await _unitOfWork.CompleteAsync();
-        return result.Succeeded;
+        return new Response<bool> { Result = result.Succeeded };
     }
 }

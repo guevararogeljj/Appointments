@@ -1,10 +1,11 @@
 using Appointments.Application.Contracts.Persistence;
 using Appointments.Application.Features.Users;
+using Appointments.Domain.Common;
 using MediatR;
 
 namespace Appointments.Application.Features.Chat.Queries.GetChatMessages;
 
-public class GetChatMessagesQueryHandler : IRequestHandler<GetChatMessagesQuery, IReadOnlyList<ChatMessageDto>>
+public class GetChatMessagesQueryHandler : IRequestHandler<GetChatMessagesQuery, Response<IReadOnlyList<ChatMessageDto>>>
 {
     private readonly IUnitOfWork _unitOfWork;
 
@@ -13,11 +14,11 @@ public class GetChatMessagesQueryHandler : IRequestHandler<GetChatMessagesQuery,
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IReadOnlyList<ChatMessageDto>> Handle(GetChatMessagesQuery request, CancellationToken cancellationToken)
+    public async Task<Response<IReadOnlyList<ChatMessageDto>>> Handle(GetChatMessagesQuery request, CancellationToken cancellationToken)
     {
         var messages = await _unitOfWork.ChatMessages.GetMessagesByChatRoomIdAsync(request.ChatRoomId);
 
-        return messages.Select(m => new ChatMessageDto
+        var dtos = messages.Select(m => new ChatMessageDto
         {
             Id = m.Id,
             ChatRoomId = m.ChatRoomId,
@@ -26,5 +27,7 @@ public class GetChatMessagesQueryHandler : IRequestHandler<GetChatMessagesQuery,
             Message = m.Message,
             Timestamp = m.Timestamp
         }).OrderByDescending(x=>x.Timestamp).ToList();
+
+        return new Response<IReadOnlyList<ChatMessageDto>> { Result = dtos };
     }
 }

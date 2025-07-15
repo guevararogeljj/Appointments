@@ -3,10 +3,11 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Appointments.Application.Contracts.Persistence;
+using Appointments.Domain.Common;
 
 namespace Appointments.Application.Features.Roles.Queries.GetAllRoles;
 
-public class GetAllRolesQueryHandler : IRequestHandler<GetAllRolesQuery, IReadOnlyList<RoleDto>>
+public class GetAllRolesQueryHandler : IRequestHandler<GetAllRolesQuery, Response<IReadOnlyList<RoleDto>>>
 {
     private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly IUnitOfWork _unitOfWork;
@@ -17,14 +18,16 @@ public class GetAllRolesQueryHandler : IRequestHandler<GetAllRolesQuery, IReadOn
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IReadOnlyList<RoleDto>> Handle(GetAllRolesQuery request, CancellationToken cancellationToken)
+    public async Task<Response<IReadOnlyList<RoleDto>>> Handle(GetAllRolesQuery request, CancellationToken cancellationToken)
     {
         var roles = await _roleManager.Roles.ToListAsync();
 
-        return roles.Select(r => new RoleDto
+        var dtos = roles.Select(r => new RoleDto
         {
             Id = r.Id,
             Name = r.Name
         }).ToList();
+
+        return new Response<IReadOnlyList<RoleDto>> { Result = dtos };
     }
 }

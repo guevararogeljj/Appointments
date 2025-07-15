@@ -1,11 +1,12 @@
 using Appointments.Application.Contracts.Persistence;
 using Appointments.Application.Events;
+using Appointments.Domain.Common;
 using Appointments.Domain.Entities;
 using MediatR;
 
 namespace Appointments.Application.Features.Appointments.Commands.CreateAppointment;
 
-public class CreateAppointmentCommandHandler : IRequestHandler<CreateAppointmentCommand, Guid>
+public class CreateAppointmentCommandHandler : IRequestHandler<CreateAppointmentCommand, Response<Guid>>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEventPublisher _eventPublisher;
@@ -16,12 +17,12 @@ public class CreateAppointmentCommandHandler : IRequestHandler<CreateAppointment
         _eventPublisher = eventPublisher;
     }
 
-    public async Task<Guid> Handle(CreateAppointmentCommand request, CancellationToken cancellationToken)
+    public async Task<Response<Guid>> Handle(CreateAppointmentCommand request, CancellationToken cancellationToken)
     {
         var patient = await _unitOfWork.Patients.GetByIdAsync(request.PatientId);
         if (patient == null)
         {
-            throw new ApplicationException($"Patient with ID {request.PatientId} not found.");
+            return new Response<Guid> { Error = new Error("NotFound", $"Patient with ID {request.PatientId} not found.") };
         }
 
         var appointment = new Appointment
@@ -46,6 +47,6 @@ public class CreateAppointmentCommandHandler : IRequestHandler<CreateAppointment
 
         _eventPublisher.Publish(appointmentCreatedEvent);
         
-        return appointment.Id;
+        return new Response<Guid> { Result = appointment.Id };
     }
 }

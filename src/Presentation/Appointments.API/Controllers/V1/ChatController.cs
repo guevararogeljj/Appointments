@@ -1,6 +1,7 @@
 using Appointments.Application.Features.Chat.Commands.CreateChatRoom;
 using Appointments.Application.Features.Chat.Queries.GetChatMessages;
 using Appointments.Application.Features.Chat.Queries.GetUserChatRooms;
+using Appointments.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,15 +25,23 @@ public class ChatController : ControllerBase
     [HttpPost("create-room")]
     public async Task<IActionResult> CreateChatRoom([FromBody] CreateChatRoomCommand command)
     {
-        var chatRoomId = await _mediator.Send(command);
-        return Ok(chatRoomId);
+        var result = await _mediator.Send(command);
+        if (result.Error != null)
+        {
+            return BadRequest(result.Error);
+        }
+        return Ok(result.Result);
     }
-[AllowAnonymous]
+    [AllowAnonymous]
     [HttpGet("messages/{chatRoomId}")]
     public async Task<IActionResult> GetChatMessages(Guid chatRoomId)
     {
-        var messages = await _mediator.Send(new GetChatMessagesQuery { ChatRoomId = chatRoomId });
-        return Ok(messages);
+        var result = await _mediator.Send(new GetChatMessagesQuery { ChatRoomId = chatRoomId });
+        if (result.Error != null)
+        {
+            return NotFound(result.Error);
+        }
+        return Ok(result.Result);
     }
 
     [HttpGet("my-rooms")]
@@ -41,9 +50,13 @@ public class ChatController : ControllerBase
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
         {
-            return Unauthorized();
+            return Unauthorized(new Error("Unauthorized", "User not found"));
         }
-        var chatRooms = await _mediator.Send(new GetUserChatRoomsQuery { UserId = userId });
-        return Ok(chatRooms);
+        var result = await _mediator.Send(new GetUserChatRoomsQuery { UserId = userId });
+        if (result.Error != null)
+        {
+            return NotFound(result.Error);
+        }
+        return Ok(result.Result);
     }
 }

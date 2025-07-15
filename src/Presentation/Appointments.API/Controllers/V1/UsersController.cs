@@ -2,6 +2,7 @@ using Appointments.Application.Features.Users.Commands.DeleteUser;
 using Appointments.Application.Features.Users.Commands.UpdateUser;
 using Appointments.Application.Features.Users.Queries.GetAllUsers;
 using Appointments.Application.Features.Users.Queries.GetUserById;
+using Appointments.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,28 +25,32 @@ public class UsersController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var dtos = await _mediator.Send(new GetAllUsersQuery());
-        return Ok(dtos);
+        var result = await _mediator.Send(new GetAllUsersQuery());
+        if (result.Error != null)
+        {
+            return BadRequest(result.Error);
+        }
+        return Ok(result.Result);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(string id)
     {
-        var dto = await _mediator.Send(new GetUserByIdQuery { Id = id });
-        if (dto == null)
+        var result = await _mediator.Send(new GetUserByIdQuery { Id = id });
+        if (result.Error != null)
         {
-            return NotFound();
+            return NotFound(result.Error);
         }
-        return Ok(dto);
+        return Ok(result.Result);
     }
 
     [HttpPut]
     public async Task<IActionResult> Update([FromBody] UpdateUserCommand command)
     {
         var result = await _mediator.Send(command);
-        if (!result)
+        if (result.Error != null)
         {
-            return BadRequest();
+            return BadRequest(result.Error);
         }
         return NoContent();
     }
@@ -54,9 +59,9 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> Delete(string id)
     {
         var result = await _mediator.Send(new DeleteUserCommand { Id = id });
-        if (!result)
+        if (result.Error != null)
         {
-            return BadRequest();
+            return BadRequest(result.Error);
         }
         return NoContent();
     }

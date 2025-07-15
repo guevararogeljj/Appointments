@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Appointments.Domain.Entities.Identity;
 using Microsoft.AspNetCore.Authorization;
+using Appointments.Domain.Common;
 
 namespace Appointments.API.Controllers.V1;
 
@@ -24,20 +25,20 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login([FromBody] AuthRequest request)
     {
         var result = await _authService.Login(request);
-        if (result.Token == null)
+        if (result.Error != null)
         {
-            return Unauthorized();
+            return Unauthorized(result.Error);
         }
-        return Ok(result);
+        return Ok(result.Result);
     }
 
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegistrationRequest request)
     {
         var result = await _authService.Register(request);
-        if (!result.RegistrationSuccessful)
+        if (result.Error != null)
         {
-            return BadRequest(result.Errors);
+            return BadRequest(result.Error);
         }
 
         var user = await _userManager.FindByEmailAsync(request.Email);
@@ -46,23 +47,23 @@ public class AuthController : ControllerBase
             await _userManager.AddToRoleAsync(user, request.Role);
         }
 
-        return Ok(result);
+        return Ok(result.Result);
     }
 
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
     {
         var result = await _authService.RefreshToken(request);
-        if (result.Token == null)
+        if (result.Error != null)
         {
-            return Unauthorized();
+            return Unauthorized(result.Error);
         }
-        return Ok(result);
+        return Ok(result.Result);
     }
     [Authorize]
     [HttpGet("protegido")]
     public IActionResult Protegido()
     {
-        return Ok("Acceso concedido con JWT");
+        return Ok(new Response<string> { Result = "Acceso concedido con JWT" });
     }
 }

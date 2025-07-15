@@ -3,6 +3,7 @@ using Appointments.Application.Features.Roles.Commands.DeleteRole;
 using Appointments.Application.Features.Roles.Commands.UpdateRole;
 using Appointments.Application.Features.Roles.Queries.GetAllRoles;
 using Appointments.Application.Features.Roles.Queries.GetRoleById;
+using Appointments.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,35 +26,43 @@ public class RolesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var dtos = await _mediator.Send(new GetAllRolesQuery());
-        return Ok(dtos);
+        var result = await _mediator.Send(new GetAllRolesQuery());
+        if (result.Error != null)
+        {
+            return BadRequest(result.Error);
+        }
+        return Ok(result.Result);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(string id)
     {
-        var dto = await _mediator.Send(new GetRoleByIdQuery { Id = id });
-        if (dto == null)
+        var result = await _mediator.Send(new GetRoleByIdQuery { Id = id });
+        if (result.Error != null)
         {
-            return NotFound();
+            return NotFound(result.Error);
         }
-        return Ok(dto);
+        return Ok(result.Result);
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateRoleCommand command)
     {
-        var id = await _mediator.Send(command);
-        return Ok(id);
+        var result = await _mediator.Send(command);
+        if (result.Error != null)
+        {
+            return BadRequest(result.Error);
+        }
+        return Ok(result.Result);
     }
 
     [HttpPut]
     public async Task<IActionResult> Update([FromBody] UpdateRoleCommand command)
     {
         var result = await _mediator.Send(command);
-        if (!result)
+        if (result.Error != null)
         {
-            return BadRequest();
+            return BadRequest(result.Error);
         }
         return NoContent();
     }
@@ -62,9 +71,9 @@ public class RolesController : ControllerBase
     public async Task<IActionResult> Delete(string id)
     {
         var result = await _mediator.Send(new DeleteRoleCommand { Id = id });
-        if (!result)
+        if (result.Error != null)
         {
-            return BadRequest();
+            return BadRequest(result.Error);
         }
         return NoContent();
     }

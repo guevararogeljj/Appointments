@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Appointments.Application.Features.Appointments.Commands.CreateAppointment;
 using Appointments.Application.Features.Appointments.Queries.GetAllAppointments;
 using Appointments.Application.Features.Appointments.Queries.GetAppointmentById;
+using Appointments.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,25 +24,33 @@ public class AppointmentsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var dtos = await _mediator.Send(new GetAllAppointmentsQuery());
-        return Ok(dtos);
+        var result = await _mediator.Send(new GetAllAppointmentsQuery());
+        if (result.Error != null)
+        {
+            return BadRequest(result.Error);
+        }
+        return Ok(result.Result);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        var dto = await _mediator.Send(new GetAppointmentByIdQuery { Id = id });
-        if (dto == null)
+        var result = await _mediator.Send(new GetAppointmentByIdQuery { Id = id });
+        if (result.Error != null)
         {
-            return NotFound();
+            return NotFound(result.Error);
         }
-        return Ok(dto);
+        return Ok(result.Result);
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateAppointmentCommand command)
     {
-        var id = await _mediator.Send(command);
-        return Ok(id);
+        var result = await _mediator.Send(command);
+        if (result.Error != null)
+        {
+            return BadRequest(result.Error);
+        }
+        return Ok(result.Result);
     }
 }
