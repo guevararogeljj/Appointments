@@ -23,9 +23,9 @@ public class UnitOfWork : IUnitOfWork
     public IChatRoomRepository ChatRooms => _chatRoomRepository ??= new ChatRoomRepository(_context);
     public IChatMessageRepository ChatMessages => _chatMessageRepository ??= new ChatMessageRepository(_context);
 
-    public async Task<int> CompleteAsync()
+    public async Task<int> CompleteAsync(string user)
     {
-        return await _context.SaveChangesAsync();
+        return await _context.SaveChangesAsync(user);
     }
 
     public void Dispose()

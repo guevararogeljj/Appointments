@@ -1,8 +1,10 @@
+using System.Security.Claims;
 using Appointments.Application.Contracts.Persistence;
 using Appointments.Application.Events;
 using Appointments.Domain.Common;
 using Appointments.Domain.Entities;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 
 namespace Appointments.Application.Features.Appointments.Commands.CreateAppointment;
 
@@ -10,11 +12,13 @@ public class CreateAppointmentCommandHandler : IRequestHandler<CreateAppointment
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEventPublisher _eventPublisher;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public CreateAppointmentCommandHandler(IUnitOfWork unitOfWork, IEventPublisher eventPublisher)
+    public CreateAppointmentCommandHandler(IUnitOfWork unitOfWork, IEventPublisher eventPublisher, IHttpContextAccessor httpContextAccessor)
     {
         _unitOfWork = unitOfWork;
         _eventPublisher = eventPublisher;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<Response<Guid>> Handle(CreateAppointmentCommand request, CancellationToken cancellationToken)
@@ -34,7 +38,12 @@ public class CreateAppointmentCommandHandler : IRequestHandler<CreateAppointment
         };
 
         await _unitOfWork.Appointments.AddAsync(appointment);
-        await _unitOfWork.CompleteAsync();
+        var user = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (user == null)
+        {
+            return new Response<Guid> { Error = new Error("Unauthorized", "User not found") };
+        }
+        await _unitOfWork.CompleteAsync(user);
 
         var appointmentCreatedEvent = new AppointmentCreatedEvent
         {

@@ -85,7 +85,7 @@ public class AuthService : IAuthService
         }
 
         _unitOfWork.RefreshTokens.Remove(storedRefreshToken);
-        await _unitOfWork.CompleteAsync();
+        await _unitOfWork.CompleteAsync(userId);
 
         var newAccessToken = await GenerateJwtToken(user);
         var newRefreshToken = await GenerateRefreshToken(user.Id);
@@ -103,7 +103,7 @@ public class AuthService : IAuthService
         };
 
         await _unitOfWork.RefreshTokens.AddAsync(refreshToken);
-        await _unitOfWork.CompleteAsync();
+        await _unitOfWork.CompleteAsync(userId);
 
         return refreshToken;
     }

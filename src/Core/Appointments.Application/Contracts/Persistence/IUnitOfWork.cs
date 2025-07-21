@@ -9,5 +9,5 @@ public interface IUnitOfWork : IDisposable
     IRefreshTokenRepository RefreshTokens { get; }
     IChatRoomRepository ChatRooms { get; }
     IChatMessageRepository ChatMessages { get; }
-    Task<int> CompleteAsync();
+    Task<int> CompleteAsync(string user);
 }

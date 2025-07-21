@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using Appointments.Domain.Entities.Identity;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Appointments.Application.Contracts.Persistence;
 using Appointments.Domain.Common;
@@ -10,11 +12,13 @@ public class DeleteRoleCommandHandler : IRequestHandler<DeleteRoleCommand, Respo
 {
     private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public DeleteRoleCommandHandler(RoleManager<ApplicationRole> roleManager, IUnitOfWork unitOfWork)
+    public DeleteRoleCommandHandler(RoleManager<ApplicationRole> roleManager, IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
     {
         _roleManager = roleManager;
         _unitOfWork = unitOfWork;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<Response<bool>> Handle(DeleteRoleCommand request, CancellationToken cancellationToken)
@@ -26,7 +30,8 @@ public class DeleteRoleCommandHandler : IRequestHandler<DeleteRoleCommand, Respo
         }
 
         var result = await _roleManager.DeleteAsync(role);
-        await _unitOfWork.CompleteAsync();
+        var user = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        await _unitOfWork.CompleteAsync(user);
         return new Response<bool> { Result = result.Succeeded };
     }
 }

@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using Appointments.Domain.Entities.Identity;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Appointments.Application.Contracts.Persistence;
 using Appointments.Domain.Common;
@@ -10,11 +12,13 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Respo
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public DeleteUserCommandHandler(UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork)
+    public DeleteUserCommandHandler(UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
     {
         _userManager = userManager;
         _unitOfWork = unitOfWork;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<Response<bool>> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
@@ -26,7 +30,8 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Respo
         }
 
         var result = await _userManager.DeleteAsync(user);
-        await _unitOfWork.CompleteAsync();
+        var userRequest = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        await _unitOfWork.CompleteAsync(userRequest);
         return new Response<bool> { Result = result.Succeeded };
     }
 }

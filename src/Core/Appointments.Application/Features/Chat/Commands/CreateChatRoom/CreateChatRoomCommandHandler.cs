@@ -1,17 +1,21 @@
+using System.Security.Claims;
 using Appointments.Application.Contracts.Persistence;
 using Appointments.Domain.Common;
 using Appointments.Domain.Entities.Chat;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 
 namespace Appointments.Application.Features.Chat.Commands.CreateChatRoom;
 
 public class CreateChatRoomCommandHandler : IRequestHandler<CreateChatRoomCommand, Response<Guid>>
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public CreateChatRoomCommandHandler(IUnitOfWork unitOfWork)
+    public CreateChatRoomCommandHandler(IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
     {
         _unitOfWork = unitOfWork;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<Response<Guid>> Handle(CreateChatRoomCommand request, CancellationToken cancellationToken)
@@ -31,7 +35,8 @@ public class CreateChatRoomCommandHandler : IRequestHandler<CreateChatRoomComman
         };
 
         await _unitOfWork.ChatRooms.AddAsync(chatRoom);
-        await _unitOfWork.CompleteAsync();
+        var user = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        await _unitOfWork.CompleteAsync(user);
 
         return new Response<Guid> { Result = chatRoom.Id };
     }
