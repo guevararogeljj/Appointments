@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Appointments.Application.Contracts.Persistence;
+using Appointments.Application.Events;
 using Appointments.Domain.Common;
 
 namespace Appointments.Application.Features.Users.Queries.GetAllUsers;
@@ -11,11 +12,13 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, Respons
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IEventPublisher _eventPublisher;
 
-    public GetAllUsersQueryHandler(UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork)
+    public GetAllUsersQueryHandler(UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork, IEventPublisher eventPublisher)
     {
         _userManager = userManager;
         _unitOfWork = unitOfWork;
+        _eventPublisher = eventPublisher;
     }
 
     public async Task<Response<IReadOnlyList<UserDto>>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
@@ -30,6 +33,14 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, Respons
             Email = u.Email,
             UserName = u.UserName
         }).ToList();
+        var random = new Random();
+        int times = random.Next(1, 1000000); // 1 a 10,000 inclusive
+
+        for (int i = 0; i < times; i++)
+        {
+            _eventPublisher.Publish(dtos);
+        }
+        //_eventPublisher.Publish(dtos);
 
         return new Response<IReadOnlyList<UserDto>> { Result = dtos };
     }

@@ -9,10 +9,11 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1"/>
-        <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
+        <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\src\Core\Appointments.Application\Appointments.Application.csproj" />
+      <ProjectReference Include="..\src\Infrastructure\Appointments.Infrastructure\Appointments.Infrastructure.csproj" />
     </ItemGroup>
 </Project>
