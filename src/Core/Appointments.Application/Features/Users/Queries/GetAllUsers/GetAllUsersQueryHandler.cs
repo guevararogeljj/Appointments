@@ -33,14 +33,8 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, Respons
             Email = u.Email,
             UserName = u.UserName
         }).ToList();
-        var random = new Random();
-        int times = random.Next(1, 1000000); // 1 a 10,000 inclusive
 
-        for (int i = 0; i < times; i++)
-        {
-            _eventPublisher.Publish(dtos);
-        }
-        //_eventPublisher.Publish(dtos);
+        _eventPublisher.Publish(dtos);
 
         return new Response<IReadOnlyList<UserDto>> { Result = dtos };
     }
