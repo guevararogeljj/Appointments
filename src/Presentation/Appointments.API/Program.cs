@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using Appointments.Application;
 using Appointments.Infrastructure;
 using Appointments.API;
@@ -8,6 +9,7 @@ using Appointments.Domain.Entities.Identity;
 using Appointments.Infrastructure.Persistence.Seed;
 using Appointments.API.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Mvc;
 
@@ -104,6 +106,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddHealthCheckServices(builder.Configuration);
 var app = builder.Build();
 
 // Seed Data
@@ -132,7 +135,25 @@ app.UseAuthorization();
 app.MapHub<ChatHub>("/chatHub");
 app.MapControllers();
 
-app.MapHealthChecks("/healthz");
+app.MapHealthChecks("/healthz", new HealthCheckOptions
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var response = new
+        {
+            status = report.Status.ToString(),
+            checks = report.Entries.Select(e => new
+            {
+                servidor = e.Key,
+                estatus = e.Value.Status.ToString(),
+            }),
+            totalDuration = report.TotalDuration
+        };
+        await context.Response.WriteAsync(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
+    }
+});
+
 app.MapControllerRoute(
     name: "default",
     pattern: "api/{version}/[controller]");
