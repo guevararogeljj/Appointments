@@ -29,10 +29,7 @@ public class ApiKeyMiddleware
         {
             context.Request.Headers["Authorization"] = $"Bearer {bearerToken}";
         }
-        else
-        {
-            await context.Response.WriteAsync("Bearer token was not provided ");
-        }
+  
 
         var appSettings = context.RequestServices.GetRequiredService<IConfiguration>();
         var apiKey = appSettings.GetValue<string>(APIKEY);
