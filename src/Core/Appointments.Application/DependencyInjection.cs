@@ -17,7 +17,7 @@ public static class DependencyInjection
         });
 
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-
+        services.AddAutoMapper(cfg => { }, Assembly.GetExecutingAssembly());
         return services;
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Appointments.Application.Features.Appointments.Commands.CreateAppointment;
 using Appointments.Application.Features.Appointments.Queries.GetAllAppointments;
 using Appointments.Application.Features.Appointments.Queries.GetAppointmentById;
+using Appointments.Application.Features.Appointments.Queries.GetPagedAsync;
 using Appointments.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -53,4 +54,17 @@ public class AppointmentsController : ControllerBase
         }
         return Ok(result.Result);
     }
+    [AllowAnonymous]
+    [HttpGet("paged")]
+    public async Task<IActionResult> GetPaged([FromQuery] GetPagedAsyncQuery query)
+    {
+        var result = await _mediator.Send(query);
+        if (result.Error != null)
+        {
+            return Problem(statusCode: 400, title: result.Error.Code, detail: result.Error.Message);
+        }
+
+        return Ok(result.Result);
+    }
+
 }
