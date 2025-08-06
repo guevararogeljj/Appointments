@@ -24,9 +24,8 @@ public class GetPagedAsyncQueryHandler : IRequestHandler<GetPagedAsyncQuery, Res
             var appointments = await _unitOfWork.Appointments.GetPagedAsync(request.Pagination);
             if (appointments.Items.Any())
             {
-                var appointmentDtos = _mapper.Map<List<AppointmentDto>>(appointments.Items);
                 response.Result = new PagedResult<AppointmentDto>(
-                    appointmentDtos.ToList(),
+                    this._mapper.Map<List<AppointmentDto>>(appointments.Items),
                     appointments.TotalCount,
                     appointments.CurrentPage,
                     appointments.PageSize
