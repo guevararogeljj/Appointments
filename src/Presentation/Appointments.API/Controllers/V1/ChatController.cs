@@ -28,7 +28,7 @@ public class ChatController : ControllerBase
         var result = await _mediator.Send(command);
         if (result.Error != null)
         {
-            return Problem(statusCode: 400, title: result.Error.Code, detail: result.Error.Message);
+            return Problem(statusCode: int.Parse(result.Error.Code), title: result.Error.Code, detail: result.Error.Message);
         }
         return Ok(result.Result);
     }
@@ -39,7 +39,7 @@ public class ChatController : ControllerBase
         var result = await _mediator.Send(new GetChatMessagesQuery { ChatRoomId = chatRoomId });
         if (result.Error != null)
         {
-            return Problem(statusCode: 404, title: result.Error.Code, detail: result.Error.Message);
+            return Problem(statusCode: int.Parse(result.Error.Code), title: result.Error.Code, detail: result.Error.Message);
         }
         return Ok(result.Result);
     }
@@ -55,7 +55,7 @@ public class ChatController : ControllerBase
         var result = await _mediator.Send(new GetUserChatRoomsQuery { UserId = userId });
         if (result.Error != null)
         {
-            return Problem(statusCode: 404, title: result.Error.Code, detail: result.Error.Message);
+            return Problem(statusCode: int.Parse(result.Error.Code), title: result.Error.Code, detail: result.Error.Message);
         }
         return Ok(result.Result);
     }

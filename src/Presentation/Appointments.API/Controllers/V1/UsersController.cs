@@ -28,7 +28,7 @@ public class UsersController : ControllerBase
         var result = await _mediator.Send(new GetAllUsersQuery());
         if (result.Error != null)
         {
-            return Problem(statusCode: 400, title: result.Error.Code, detail: result.Error.Message);
+            return Problem(statusCode: int.Parse(result.Error.Code), title: result.Error.Code, detail: result.Error.Message);
         }
         return Ok(result.Result);
     }
@@ -39,7 +39,7 @@ public class UsersController : ControllerBase
         var result = await _mediator.Send(new GetUserByIdQuery { Id = id });
         if (result.Error != null)
         {
-            return Problem(statusCode: 404, title: result.Error.Code, detail: result.Error.Message);
+            return Problem(statusCode: int.Parse(result.Error.Code), title: result.Error.Code, detail: result.Error.Message);
         }
         return Ok(result.Result);
     }
@@ -50,7 +50,7 @@ public class UsersController : ControllerBase
         var result = await _mediator.Send(command);
         if (result.Error != null)
         {
-            return Problem(statusCode: 400, title: result.Error.Code, detail: result.Error.Message);
+            return Problem(statusCode: int.Parse(result.Error.Code), title: result.Error.Code, detail: result.Error.Message);
         }
         return NoContent();
     }
@@ -61,7 +61,7 @@ public class UsersController : ControllerBase
         var result = await _mediator.Send(new DeleteUserCommand { Id = id });
         if (result.Error != null)
         {
-            return Problem(statusCode: 400, title: result.Error.Code, detail: result.Error.Message);
+            return Problem(statusCode: int.Parse(result.Error.Code), title: result.Error.Code, detail: result.Error.Message);
         }
         return NoContent();
     }
