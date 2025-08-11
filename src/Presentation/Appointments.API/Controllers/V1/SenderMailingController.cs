@@ -1,4 +1,5 @@
 using Appointments.Application.Features.Mailing.Commands;
+using Appointments.Application.Features.Mailing.Commands.SenderMailingsCommand;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -35,7 +36,33 @@ public class SenderMailingController : ControllerBase
         {
             return Ok(result);
         }
+        ///problem details
         
-        return NotFound(result.Error);
+        return Problem(
+            statusCode: 404,
+            title: "Not Found",
+            detail: result.Error?.Message ?? "The requested resource was not found."
+        );
+    }
+
+    [HttpPost]
+    [Route("SenderMailings")]
+    [ProducesResponseType(typeof(string), 200)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    
+    public async Task<IActionResult> SenderMailings(SenderMailingsCommand request)
+    {
+        var result = await _mediator.Send(request);
+        if (result.Result)
+        {
+            return Ok(result);
+        }
+        ///problem details
+        return Problem(
+            statusCode: 404,
+            title: "Not Found",
+            detail: result.Error?.Message ?? "The requested resource was not found."
+        );
     }
 }
