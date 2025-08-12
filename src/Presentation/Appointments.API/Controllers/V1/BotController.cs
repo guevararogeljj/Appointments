@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Appointments.API.Controllers.V1;
 
-[Authorize]
+[AllowAnonymous]
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]

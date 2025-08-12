@@ -23,6 +23,8 @@ public static class DependencyInjection
         services.AddDbContext<AppointmentsDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
+        services.AddApplicationInsightsTelemetry(configuration.GetConnectionString("ApplicationInsights:ConnectionString"));
+        
         // Add Identity
         services.AddIdentity<ApplicationUser, ApplicationRole>()
             .AddEntityFrameworkStores<AppointmentsDbContext>()

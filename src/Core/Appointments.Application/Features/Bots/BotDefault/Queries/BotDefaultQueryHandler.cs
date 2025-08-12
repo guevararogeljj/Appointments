@@ -1,14 +1,18 @@
 using Appointments.Domain.Common;
 using MediatR;
+using Microsoft.ApplicationInsights;
 
 namespace Appointments.Application.Features.Bots.BotDefault.Queries;
 
 public class BotDefaultQueryHandler : IRequestHandler<BotDefaultQuery, Response<BotMessagesDto>>
 {
     private readonly IBotService _botService;
-    public BotDefaultQueryHandler(IBotService botService)
+    private readonly TelemetryClient _telemetryClient;
+
+    public BotDefaultQueryHandler(IBotService botService, TelemetryClient telemetryClient)
     {
         _botService = botService;
+        _telemetryClient = telemetryClient;
     }
     public async Task<Response<BotMessagesDto>> Handle(BotDefaultQuery request, CancellationToken cancellationToken)
     {
