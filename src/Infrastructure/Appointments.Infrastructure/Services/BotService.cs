@@ -32,6 +32,8 @@ public class BotService : IBotService
                 new SystemChatMessage("You are a helpful assistant.")
             };
             
+            //messages.Add(new AssistantChatMessage("Solo quiero ue respondas en español, por favor y con solo el contenido de  esta pagina https://www.k-consultores.com.mx/nosotros.html"));
+            
             messages.Add(new UserChatMessage(message));
             var responses = chatClient.CompleteChatStreaming(messages);
 

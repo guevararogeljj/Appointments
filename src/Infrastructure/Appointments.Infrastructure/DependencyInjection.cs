@@ -14,6 +14,8 @@ using Appointments.Application.Features.Auth;
 using Appointments.Application.Features.Bots.BotDefault.Queries;
 using Appointments.Infrastructure.Services;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Appointments.Application.Services;
+using Appointments.Infrastructure.Messaging;
 namespace Appointments.Infrastructure;
 
 public static class DependencyInjection
@@ -36,8 +38,8 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IBotService, BotService>();
+        services.AddSingleton<IMessageSender, ServiceBusMessageSender>();
 
         return services;
     }
 }
-

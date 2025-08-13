@@ -1,4 +1,7 @@
 using Appointments.Application.Features.Bots.BotDefault.Queries;
+using Appointments.Application.ML;
+using Appointments.Application.ML.Commands;
+using Appointments.Application.ML.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,5 +31,20 @@ public class BotController : ControllerBase
         }
         
         return Ok(response.Result);
+    }
+
+    [HttpPost("train")]
+    public async Task<IActionResult> TrainModel([FromBody] TrainModelCommand command)
+    {
+        await _mediator.Send(command);
+        return Ok();
+    }
+
+    [HttpPost("predict")]
+    public async Task<IActionResult> Predict([FromBody] ModelInput input)
+    {
+        var query = new PredictQuery(input);
+        var result = await _mediator.Send(query);
+        return Ok(result);
     }
 }

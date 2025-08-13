@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using FluentValidation;
 using Appointments.Application.Behaviors;
+using Appointments.Application.Services;
 
 namespace Appointments.Application;
 
@@ -18,6 +19,7 @@ public static class DependencyInjection
 
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         services.AddAutoMapper(cfg => { }, Assembly.GetExecutingAssembly());
+        services.AddSingleton<IMlService, MlService>();
         return services;
     }
 }
