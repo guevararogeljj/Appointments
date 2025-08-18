@@ -39,6 +39,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IBotService, BotService>();
         services.AddSingleton<IMessageSender, ServiceBusMessageSender>();
+        services.AddSingleton<ITopicSender, ServiceBusTopicSender>();
 
         return services;
     }

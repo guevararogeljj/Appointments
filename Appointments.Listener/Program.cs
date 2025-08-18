@@ -1,5 +1,6 @@
 using System.Text;
 using Appointments.Infrastructure.Services;
+using Appointments.Listener;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -7,30 +8,37 @@ class Program
 {
     public static async Task Main(string[] args)
     {
-        try
-        {
-            var configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: true)
-                .AddEnvironmentVariables()
-                .Build();
+        var host = Host.CreateDefaultBuilder(args)
+            .ConfigureAppConfiguration(config =>
+            {
+                config.AddJsonFile("appsettings.json", optional: true)
+                    .AddEnvironmentVariables();
+            })
+            .ConfigureServices((context, services) =>
+            {
+                services.AddLogging();
+                services.AddSingleton<RabbitMQConnection>(provider =>
+                {
+                    var configuration = provider.GetRequiredService<IConfiguration>();
+                    return new RabbitMQConnection(configuration);
+                });
+                services.AddSingleton<RabbitMQConsumer>();
+                services.AddHostedService<ServiceBusSubscriptionProcessor>();
+            })
+            .Build();
 
-            using var serviceProvider = new ServiceCollection()
-                .AddLogging()
-                .AddSingleton<IConfiguration>(configuration)
-                .AddSingleton<RabbitMQConnection>()
-                .BuildServiceProvider();
+        // Inicia el host (ServiceBusSubscriptionProcessor)
+        await host.StartAsync();
 
-            var logger = serviceProvider.GetRequiredService<ILogger<RabbitMQConsumer>>();
-            var consumer = new RabbitMQConsumer(configuration, logger);
+        Console.WriteLine("Presiona una tecla para salir...");
+        Console.ReadLine();
 
-            Console.WriteLine("Iniciando el consumidor de RabbitMQ...");
-            await consumer.StartAsync();
-            Console.WriteLine("Consumidor finalizado.");
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error al iniciar el consumidor: {ex.Message}");
-        }
+        await host.StopAsync();
+        // Inicia el consumidor de RabbitMQ en paralelo
+        var rabbitConsumer = host.Services.GetRequiredService<RabbitMQConsumer>();
+        var rabbitTask = rabbitConsumer.StartAsync();
+
+
     }
 }
 

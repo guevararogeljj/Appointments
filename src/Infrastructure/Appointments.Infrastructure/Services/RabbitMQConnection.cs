@@ -9,7 +9,7 @@ public class RabbitMQConnection
     private static readonly object _lock = new object();
     private readonly IConnection _connection;
 
-    private RabbitMQConnection(IConfiguration configuration)
+    public RabbitMQConnection(IConfiguration configuration)
     {
         var factory = new ConnectionFactory()
         {
