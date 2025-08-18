@@ -1,6 +1,7 @@
 using Microsoft.ML;
 using System;
 using System.IO;
+using Microsoft.ML.Data;
 
 namespace Appointments.Application.ML
 {
@@ -51,5 +52,53 @@ namespace Appointments.Application.ML
             return predictionEngine.Predict(input);
         }
     }
-}
 
+    public class ChatbotInput
+    {
+        [LoadColumn(0)]
+        public string Pregunta { get; set; }
+        [LoadColumn(1)]
+        public string Respuesta { get; set; }
+    }
+
+    public class ChatbotOutput
+    {
+        public string PredictedLabel { get; set; }
+    }
+
+    public class ChatbotTrainer
+    {
+        private readonly MLContext _mlContext;
+        private ITransformer? _model;
+
+        public ChatbotTrainer()
+        {
+            _mlContext = new MLContext();
+        }
+
+        public void Train(string dataPath)
+        {
+            if (!File.Exists(dataPath))
+                throw new FileNotFoundException($"No se encontró el archivo de entrenamiento: {dataPath}");
+            var data = _mlContext.Data.LoadFromTextFile<ChatbotInput>(dataPath, hasHeader: true, separatorChar: ',');
+            if (data.GetRowCount() == 0)
+                throw new InvalidOperationException("El archivo de entrenamiento está vacío o no tiene datos válidos.");
+            
+            var pipeline = _mlContext.Transforms.Conversion.MapValueToKey(outputColumnName: "Label", inputColumnName: "Respuesta")
+                .Append(_mlContext.Transforms.Text.FeaturizeText(outputColumnName: "Features", inputColumnName: "Pregunta"))
+                .Append(_mlContext.MulticlassClassification.Trainers.SdcaMaximumEntropy("Label", "Features"))
+                .Append(_mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
+            
+            _model = pipeline.Fit(data);
+        }
+
+        public string GetAnswer(string pregunta)
+        {
+            if (_model == null)
+                throw new InvalidOperationException("El modelo no ha sido entrenado. Ejecuta Train primero.");
+            var predEngine = _mlContext.Model.CreatePredictionEngine<ChatbotInput, ChatbotOutput>(_model);
+            var prediction = predEngine.Predict(new ChatbotInput { Pregunta = pregunta });
+            return prediction.PredictedLabel;
+        }
+    }
+}

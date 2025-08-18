@@ -20,6 +20,7 @@ public static class DependencyInjection
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         services.AddAutoMapper(cfg => { }, Assembly.GetExecutingAssembly());
         services.AddSingleton<IMlService, MlService>();
+        services.AddSingleton<IChatbotService, ChatbotService>();
         return services;
     }
 }
