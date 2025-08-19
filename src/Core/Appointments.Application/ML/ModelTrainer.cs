@@ -52,20 +52,7 @@ namespace Appointments.Application.ML
             return predictionEngine.Predict(input);
         }
     }
-
-    public class ChatbotInput
-    {
-        [LoadColumn(0)]
-        public string Pregunta { get; set; }
-        [LoadColumn(1)]
-        public string Respuesta { get; set; }
-    }
-
-    public class ChatbotOutput
-    {
-        public string PredictedLabel { get; set; }
-    }
-
+    
     public class ChatbotTrainer
     {
         private readonly MLContext _mlContext;
@@ -91,7 +78,7 @@ namespace Appointments.Application.ML
             _model = pipeline.Fit(data);
         }
 
-        public string GetAnswer(string pregunta)
+        public async Task<string> GetAnswer(string pregunta)
         {
             if (_model == null)
                 throw new InvalidOperationException("El modelo no ha sido entrenado. Ejecuta Train primero.");

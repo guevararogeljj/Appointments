@@ -1,4 +1,7 @@
+using Appointments.Application.ML.Commands.KConsultores;
+using Appointments.Application.ML.Queries.KConsultores;
 using Appointments.Application.Services;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Appointments.API.Controllers.V1
@@ -8,25 +11,29 @@ namespace Appointments.API.Controllers.V1
     [Route("api/v{version:apiVersion}/[controller]")]
     public class ChatbotController : ControllerBase
     {
-        private readonly IChatbotService _chatbotService;
-
-        public ChatbotController(IChatbotService chatbotService)
+        private readonly IMediator _mediator;
+        public ChatbotController(IMediator mediator)
         {
-            _chatbotService = chatbotService;
+            _mediator = mediator;
         }
 
-        [HttpPost("train")]
-        public IActionResult Train([FromBody] string dataPath)
+
+        [HttpPost("train-kConsultores")]
+        public async Task<IActionResult> Train([FromBody] KConsultoresCommand request)
         {
-            _chatbotService.Train(dataPath);
+            await _mediator.Send(request);
             return Ok("Modelo entrenado correctamente");
         }
 
-        [HttpPost("ask")]
-        public IActionResult Ask([FromBody] string pregunta)
+        [HttpPost("ask-KConsultores")]
+        public async Task<IActionResult> AskKConsultores([FromBody] KPredictQuery request)
         {
-            var respuesta = _chatbotService.GetAnswer(pregunta);
-            return Ok(new { respuesta });
+            var response = await _mediator.Send(request);
+            if (response == null)
+            {
+                return NotFound("No se encontró una respuesta para la pregunta.");
+            }
+            return Ok(new { response.PredictedLabel });
         }
     }
 }

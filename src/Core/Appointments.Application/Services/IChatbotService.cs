@@ -2,8 +2,8 @@ namespace Appointments.Application.Services
 {
     public interface IChatbotService
     {
-        void Train(string dataPath);
-        string GetAnswer(string pregunta);
+        Task Train(string dataPath);
+        Task<string> GetAnswer(string pregunta);
     }
 }
 

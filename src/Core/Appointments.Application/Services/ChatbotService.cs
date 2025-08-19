@@ -9,7 +9,7 @@ namespace Appointments.Application.Services
     {
         private readonly ChatbotTrainer _trainer = new ChatbotTrainer();
 
-        public void Train(string dataPath)
+        public async Task Train(string dataPath)
         {
             // Preprocesar el archivo CSV para evitar cortes por comas
             var tempPath = Path.GetTempFileName();
@@ -30,9 +30,9 @@ namespace Appointments.Application.Services
             _trainer.Train(tempPath);
         }
 
-        public string GetAnswer(string pregunta)
+        public async Task<string> GetAnswer(string pregunta)
         {
-            return _trainer.GetAnswer(pregunta);
+            return await _trainer.GetAnswer(pregunta);
         }
     }
 }
