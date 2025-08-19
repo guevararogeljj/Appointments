@@ -33,7 +33,7 @@ namespace Appointments.API.Controllers.V1
             {
                 return NotFound("No se encontró una respuesta para la pregunta.");
             }
-            return Ok(new { response.PredictedLabel });
+            return Ok(new { reply = response.PredictedLabel });
         }
     }
 }
