@@ -80,15 +80,14 @@ namespace Appointments.Application.ML
         {
             if (!File.Exists(dataPath))
                 throw new FileNotFoundException($"No se encontró el archivo de entrenamiento: {dataPath}");
-            var data = _mlContext.Data.LoadFromTextFile<ChatbotInput>(dataPath, hasHeader: true, separatorChar: ',');
+            // Cambiar el separador a punto y coma para coincidir con el archivo temporal
+            var data = _mlContext.Data.LoadFromTextFile<ChatbotInput>(dataPath, hasHeader: true, separatorChar: ';');
             if (data.GetRowCount() == 0)
                 throw new InvalidOperationException("El archivo de entrenamiento está vacío o no tiene datos válidos.");
-            
             var pipeline = _mlContext.Transforms.Conversion.MapValueToKey(outputColumnName: "Label", inputColumnName: "Respuesta")
                 .Append(_mlContext.Transforms.Text.FeaturizeText(outputColumnName: "Features", inputColumnName: "Pregunta"))
                 .Append(_mlContext.MulticlassClassification.Trainers.SdcaMaximumEntropy("Label", "Features"))
                 .Append(_mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
-            
             _model = pipeline.Fit(data);
         }
 
