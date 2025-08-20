@@ -37,4 +37,10 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Program.cs">
+      <DependentUpon>Dockerfile</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
 </Project>

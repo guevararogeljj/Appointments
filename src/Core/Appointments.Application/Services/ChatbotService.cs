@@ -2,11 +2,14 @@ using Appointments.Application.ML;
 using System.Globalization;
 using System.IO;
 using CsvHelper;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Protocols;
 
 namespace Appointments.Application.Services
 {
     public class ChatbotService : IChatbotService
     {
+
         private readonly ChatbotTrainer _trainer = new ChatbotTrainer();
 
         public async Task Train(string dataPath)
