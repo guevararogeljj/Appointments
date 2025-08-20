@@ -1,6 +1,7 @@
 using Microsoft.ML;
 using System;
 using System.IO;
+using Microsoft.Extensions.Configuration;
 using Microsoft.ML.Data;
 
 namespace Appointments.Application.ML
@@ -57,11 +58,17 @@ namespace Appointments.Application.ML
     {
         private readonly MLContext _mlContext;
         private ITransformer? _model;
+        private readonly IConfiguration _configuration;
 
         public ChatbotTrainer()
         {
+            _configuration = new ConfigurationBuilder()
+                .SetBasePath(AppContext.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .Build();
             _mlContext = new MLContext();
         }
+
 
         public void Train(string dataPath)
         {
@@ -82,9 +89,29 @@ namespace Appointments.Application.ML
         {
             if (_model == null)
                 throw new InvalidOperationException("El modelo no ha sido entrenado. Ejecuta Train primero.");
+
             var predEngine = _mlContext.Model.CreatePredictionEngine<ChatbotInput, ChatbotOutput>(_model);
             var prediction = predEngine.Predict(new ChatbotInput { Pregunta = pregunta });
-            return prediction.PredictedLabel;
+
+            var respuestasValidas = LoadAnswersValid(_configuration["KConsultores:FilePath"]);
+
+            if (respuestasValidas.Contains(prediction.PredictedLabel))
+                return prediction.PredictedLabel;
+            else
+                return null;
+        }
+        
+
+        HashSet<string> LoadAnswersValid(string rutaCsv)
+        {
+            var respuestas = new HashSet<string>();
+            foreach (var linea in File.ReadLines(rutaCsv).Skip(1)) 
+            {
+                var columnas = linea.Split(','); 
+                if (columnas.Length > 1)
+                    respuestas.Add(columnas[1].Trim().Replace("\"", "")); 
+            }
+            return respuestas;
         }
     }
 }
