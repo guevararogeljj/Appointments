@@ -1,15 +1,18 @@
 using Appointments.Application.Services;
 using MediatR;
+using Microsoft.ApplicationInsights;
 
 namespace Appointments.Application.ML.Queries.KConsultores;
 
 public class KPredictQueryHandler : IRequestHandler<KPredictQuery, ChatbotOutput>
 {
     private readonly IChatbotService _chatbotService;
+    private readonly TelemetryClient _telemetryClient;
     
-    public KPredictQueryHandler(IChatbotService chatbotService)
+    public KPredictQueryHandler(IChatbotService chatbotService, TelemetryClient telemetryClient)
     {
         _chatbotService = chatbotService;
+        _telemetryClient = telemetryClient;
     }
     
     public async Task<ChatbotOutput> Handle(KPredictQuery request, CancellationToken cancellationToken)

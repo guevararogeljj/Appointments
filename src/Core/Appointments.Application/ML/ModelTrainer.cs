@@ -63,8 +63,8 @@ namespace Appointments.Application.ML
         public ChatbotTrainer()
         {
             _configuration = new ConfigurationBuilder()
-                .SetBasePath(AppContext.BaseDirectory)
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true) 
                 .Build();
             _mlContext = new MLContext();
         }
