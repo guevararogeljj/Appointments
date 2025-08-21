@@ -32,3 +32,13 @@ steps:
   inputs:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
+
+- task: AzureRmWebAppDeployment@5
+  displayName: "despliegue"
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: 'Suscripción de Azure 1(5dca32b6-0caf-4e1b-ade7-51b7b52dd1fa)'
+    appType: 'webAppLinux'
+    WebAppName: 'Pruebajjgr'
+    packageForLinux: '$(System.DefaultWorkingDirectory)/**/*.zip'
+    DeploymentTypeLinux: 'oneDeploy'
