@@ -37,5 +37,10 @@ namespace Appointments.Application.Services
         {
             return await _trainer.GetAnswer(pregunta);
         }
+        
+        public async Task<string> GetAnswerReto97(string pregunta)
+        {
+            return await _trainer.GetAnswerReto97(pregunta);
+        }
     }
 }

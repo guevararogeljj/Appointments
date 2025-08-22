@@ -101,7 +101,21 @@ namespace Appointments.Application.ML
                 return null;
         }
         
+        public async Task<string> GetAnswerReto97(string pregunta)
+        {
+            if (_model == null)
+                throw new InvalidOperationException("El modelo no ha sido entrenado. Ejecuta Train primero.");
 
+            var predEngine = _mlContext.Model.CreatePredictionEngine<ChatbotInput, ChatbotOutput>(_model);
+            var prediction = predEngine.Predict(new ChatbotInput { Pregunta = pregunta });
+
+            var respuestasValidas = LoadAnswersValid(_configuration["Reto97:FilePath"]);
+
+            if (respuestasValidas.Contains(prediction.PredictedLabel))
+                return prediction.PredictedLabel;
+            else
+                return null;
+        }
         HashSet<string> LoadAnswersValid(string rutaCsv)
         {
             var respuestas = new HashSet<string>();

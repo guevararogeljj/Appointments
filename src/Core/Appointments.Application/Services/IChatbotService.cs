@@ -4,6 +4,7 @@ namespace Appointments.Application.Services
     {
         Task Train(string dataPath);
         Task<string> GetAnswer(string pregunta);
+        Task<string> GetAnswerReto97(string pregunta);
     }
 }
 
