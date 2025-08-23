@@ -2,10 +2,12 @@ trigger:
 - main
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'ubuntu-latest'
 
 variables:
   buildConfiguration: 'Release'
+  apiProject: 'src/Presentation/Appointments.API/Appointments.API.csproj'
+  outputDir: '$(build.artifactStagingDirectory)/api'
 
 steps:
 - task: UseDotNet@2
@@ -16,29 +18,17 @@ steps:
 
 - task: DotNetCoreCLI@2
   inputs:
-    command: 'restore'
-    projects: '**/*.csproj'
-
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'build'
-    projects: '**/*.csproj'
-    arguments: '--configuration $(buildConfiguration)'
-
-- task: DotNetCoreCLI@2
-  inputs:
     command: 'publish'
-    publishWebProjects: true
-    arguments: '--configuration $(buildConfiguration) --output $(build.artifactStagingDirectory)'
+    publishWebProjects: false
+    projects: '$(apiProject)'
+    arguments: '--configuration $(buildConfiguration) --output $(outputDir)'
     zipAfterPublish: true
 
-- task: CmdLine@2
-  inputs:
-    script: |
-      dir "$(build.artifactStagingDirectory)"
+- script: ls -la $(outputDir)
+  displayName: 'Listar archivos publicados del API'
 
 - task: PublishBuildArtifacts@1
   inputs:
-    pathToPublish: '$(build.artifactStagingDirectory)'
-    artifactName: 'drop'
+    pathToPublish: '$(outputDir)'
+    artifactName: 'api'
     publishLocation: 'Container'
