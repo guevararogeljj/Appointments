@@ -14,7 +14,7 @@ steps:
     version: '9.0.x'
 
 - script: dotnet restore
-  displayName: 'Restaurar paquetes'
+  displayName: 'Restaurar dependencias'
 
 - script: dotnet build --configuration $(buildConfiguration)
   displayName: 'Compilar proyecto'
@@ -29,19 +29,22 @@ steps:
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/api/Appointments.API.zip'
     replaceExistingArchive: true
+  displayName: 'Crear archivo ZIP'
 
 - task: PublishBuildArtifacts@1
   inputs:
-    pathToPublish: '$(Build.ArtifactStagingDirectory)/api/Appointments.API.zip'
+    pathToPublish: '$(Build.ArtifactStagingDirectory)/api'
     artifactName: 'api'
     publishLocation: 'Container'
+  displayName: 'Publicar artefacto'
 
 - task: DownloadBuildArtifacts@0
   inputs:
     buildType: 'current'
     downloadType: 'single'
     artifactName: 'api'
-    downloadPath: '$(System.DefaultWorkingDirectory)/api'
+    downloadPath: '$(Pipeline.Workspace)'
+  displayName: 'Descargar artefacto'
 
 - task: AzureRmWebAppDeployment@5
   displayName: "Desplegar API"
@@ -50,5 +53,5 @@ steps:
     azureSubscription: 'Suscripción de Azure 1(5dca32b6-0caf-4e1b-ade7-51b7b52dd1fa)'
     appType: 'webAppLinux'
     WebAppName: 'AppointmentsAPI'
-    packageForLinux: '$(System.DefaultWorkingDirectory)/api/Appointments.API.zip'
+    packageForLinux: '$(Pipeline.Workspace)/api/Appointments.API.zip'
     DeploymentTypeLinux: 'oneDeploy'
