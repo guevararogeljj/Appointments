@@ -6,32 +6,36 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
-  apiProject: 'src/Presentation/Appointments.API/Appointments.API.csproj'
-  outputDir: '$(build.artifactStagingDirectory)/api'
 
 steps:
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
-    version: '9.x'
-    installationPath: $(Agent.ToolsDirectory)/dotnet
+    version: '9.0.x'
 
-- task: DotNetCoreCLI@2
+- script: dotnet restore
+  displayName: 'Restaurar paquetes'
+
+- script: dotnet build --configuration $(buildConfiguration)
+  displayName: 'Compilar proyecto'
+
+- script: dotnet publish src/Presentation/Appointments.API/Appointments.API.csproj --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/api
+  displayName: 'Publicar proyecto'
+
+- task: ArchiveFiles@2
   inputs:
-    command: 'publish'
-    publishWebProjects: false
-    projects: '$(apiProject)'
-    arguments: '--configuration $(buildConfiguration) --output $(outputDir)'
-    zipAfterPublish: true
-
-- script: ls -la $(outputDir)
-  displayName: 'Listar archivos publicados del API'
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/api'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/api/Appointments.API.zip'
+    replaceExistingArchive: true
 
 - task: PublishBuildArtifacts@1
   inputs:
-    pathToPublish: '$(System.DefaultWorkingDirectory)/api/Appointments.API.zip'
+    pathToPublish: '$(Build.ArtifactStagingDirectory)/api/Appointments.API.zip'
     artifactName: 'api'
     publishLocation: 'Container'
+
 - task: DownloadBuildArtifacts@0
   inputs:
     buildType: 'current'
@@ -40,7 +44,7 @@ steps:
     downloadPath: '$(System.DefaultWorkingDirectory)/api'
 
 - task: AzureRmWebAppDeployment@5
-  displayName: "despliegue API"
+  displayName: "Desplegar API"
   inputs:
     ConnectionType: 'AzureRM'
     azureSubscription: 'Suscripción de Azure 1(5dca32b6-0caf-4e1b-ade7-51b7b52dd1fa)'
