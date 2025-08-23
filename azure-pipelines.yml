@@ -27,6 +27,11 @@ steps:
 - script: ls -la $(outputDir)
   displayName: 'Listar archivos publicados del API'
 
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: '$(System.DefaultWorkingDirectory)/api/Appointments.API.zip'
+    artifactName: 'api'
+    publishLocation: 'Container'
 - task: DownloadBuildArtifacts@0
   inputs:
     buildType: 'current'
