@@ -51,5 +51,5 @@ steps:
     azureSubscription: 'Suscripción de Azure 1(5dca32b6-0caf-4e1b-ade7-51b7b52dd1fa)'
     appType: 'webAppLinux'
     WebAppName: 'Pruebajjgr'
-    packageForLinux: '$(System.DefaultWorkingDirectory)/Appointments/src/Presentation/Appointments.API/bin/Release/net9.0/publish/Appointments.API.zip'
+    packageForLinux: '$(System.DefaultWorkingDirectory)/Appointments.API.zip'
     DeploymentTypeLinux: 'oneDeploy'
