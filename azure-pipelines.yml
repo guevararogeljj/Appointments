@@ -27,12 +27,19 @@ steps:
 - script: ls -la $(outputDir)
   displayName: 'Listar archivos publicados del API'
 
+- task: DownloadBuildArtifacts@0
+  inputs:
+    buildType: 'current'
+    downloadType: 'single'
+    artifactName: 'api'
+    downloadPath: '$(System.DefaultWorkingDirectory)/api'
+
 - task: AzureRmWebAppDeployment@5
-  displayName: "despliegue"
+  displayName: "despliegue API"
   inputs:
     ConnectionType: 'AzureRM'
     azureSubscription: 'Suscripción de Azure 1(5dca32b6-0caf-4e1b-ade7-51b7b52dd1fa)'
     appType: 'webAppLinux'
     WebAppName: 'AppointmentsAPI'
-    packageForLinux: '$(System.DefaultWorkingDirectory)/Appointments.API.zip'
+    packageForLinux: '$(System.DefaultWorkingDirectory)/api/Appointments.API.zip'
     DeploymentTypeLinux: 'oneDeploy'
